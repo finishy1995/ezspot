@@ -1,0 +1,6 @@
+{
+  "test_libs_aws_client.py": true, 
+  "test_libs_aws_client.py::TestClient::test_profile": true, 
+  "test_libs_aws_client.py::test_answer": true, 
+  "test_libs_aws_client.py::test_wcf": true
+}

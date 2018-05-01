@@ -1,4 +1,7 @@
 import time
+import datetime
+from elastic_ip import associate_eip
+from elastic_ip import disassociate_eip
 
 def start_fleet(config, index):
     request_id = _request(config, index)
@@ -7,9 +10,9 @@ def start_fleet(config, index):
     _wait_until_completed(config.ec2Client, request_id)
     instances = _describe_fleet_instances(config.ec2Client, request_id)
     
-    # TODO: Associate EIP
+    eip_arr = associate_eip(config.ec2Client, instances, _get_config_arr_attr(config, 'wld_fleet_tag', index))
     
-    return instances
+    return eip_arr
     
 def cancel_fleet(config, index):
     request_id = _get_fleet_request_id(config, index)
@@ -18,6 +21,8 @@ def cancel_fleet(config, index):
         response = _cancel_fleet_request(config.ec2Client, request_id)
         
         if response.get('UnsuccessfulFleetRequests', []) == []:
+            disassociate_eip(config.ec2Client, _get_config_arr_attr(config, 'wld_fleet_tag', index))
+            
             return True
     
     return False
@@ -138,8 +143,11 @@ def _cancel_fleet_request(client, request_id):
     return response
     
 def _describe_fleet_instance_history(client, request_id):
+    print (datetime.datetime.now() - datetime.timedelta(days=7)).isoformat()
+    
     return client.describe_spot_fleet_request_history(
         EventType='instanceChange',
-        SpotFleetRequestId=request_id
+        SpotFleetRequestId=request_id,
+        StartTime=(datetime.datetime.now() - datetime.timedelta(days=1)),
     )
     

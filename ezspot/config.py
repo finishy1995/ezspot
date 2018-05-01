@@ -1,34 +1,38 @@
 import os.path
 import six
-from botocore.configloader import raw_config_parse
+from config_loader import raw_config_parse
 from iam_role import get_fleet_role
 from ami import get_ami_id
+from libs.aws_client import client as build_client
 
 defaultConfig = {
     'aws_profile'               : 'default',
     'prc_product_timerange'     : 168,
     'prc_product_description'   : 'Linux/UNIX (Amazon VPC)',
+    'wld_fleet_number'          : 1,
     'wld_instance_type'         : ['c4.large'],
     'wld_instance_capacity'     : [1],
     'wld_fleet_tag'             : ['test'],
 }
 
 class Config:
-    def __init__(self, client, args):
-        self.ec2Client = client[0]
-        self.iamClient = client[1]
+    def __init__(self, args):
+        self.ec2Client = build_client(args)
+        self.iamClient = build_client(args, 'iam')
+        self.lambdaClient = build_client(args, 'lambda')
+        self.eventClient = build_client(args, 'events')
         self._config = defaultConfig
         
         if args.lau_config_file_path:
             config_file_path = os.path.expanduser(args.lau_config_file_path)
         else:
-            config_file_path = os.path.expanduser('~/.spot-launcher/config')
+            config_file_path = os.path.expanduser('~/.ezspot/config')
         
         if os.path.isfile(config_file_path):
             if args.lau_config_file:
                 self._config.update(raw_config_parse(config_file_path)[args.lau_config_file])
             else:
-                self._config.update((config_file_path)['default'])
+                self._config.update(raw_config_parse(config_file_path)['default'])
         
         self._config.update({k: v for k, v in six.iteritems(vars(args)) if v})
         
@@ -56,6 +60,10 @@ class Config:
     @property
     def prc_product_description(self):
         return self._get_required('prc_product_description')
+    
+    @property
+    def wld_fleet_number(self):
+        return self._get_required('wld_fleet_number')
     
     @property
     def wld_instance_type(self):

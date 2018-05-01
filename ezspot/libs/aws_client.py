@@ -10,8 +10,8 @@ def client(args, service='ec2'):
         
     if args.aws_region:
         # TODO: Add profile support BJS Lambda
-        if service == 'lambda' and args.aws_region == 'cn-north-1':
-            client = partial(client, 'cn-northwest-1')
+        if (service == 'lambda' or service == 'events') and args.aws_region == 'cn-northwest-1':
+            client = partial(client, 'cn-north-1')
         else:
             client = partial(client, args.aws_region)
         
