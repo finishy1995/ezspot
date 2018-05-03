@@ -1,3 +1,5 @@
+import libs.logger as logger
+
 class Request:
     # EZSpot Config
     lau_config_file_path    = None
@@ -31,3 +33,4 @@ class Request:
             if hasattr(self, key):
                 setattr(self, key, value)
     
+        logger.debug('Request created successfully.')

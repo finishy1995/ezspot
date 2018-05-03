@@ -1,5 +1,7 @@
-import boto3
+from aws_client import call
 import json
+
+client = 'iam'
 
 basic_lambda_role = {
     "Version": "2012-10-17",
@@ -33,13 +35,13 @@ eip_handler_policy = {
     ]
 }
 
-def get_fleet_role(client):
+def get_fleet_role():
     name = 'AWSServiceRoleForEC2SpotFleet'
     
-    return _get_role(client, name)
+    return _get_role(name)
 
-def create_eip_handler_role(client, name):
-    arn = _create_role(client, name, basic_lambda_role)
+def create_eip_handler_role(name):
+    arn = _create_role(name, basic_lambda_role)
     
     client.put_role_policy(
         RoleName=name,
@@ -49,20 +51,18 @@ def create_eip_handler_role(client, name):
     
     return arn
 
-def _get_role(client, name):
-    response = client.get_role(
-        RoleName=name
-    )
+def _get_role(name):
+    response = call(client, 'get_role', 'Get iam role successfully.', RoleName=name)
 
-    return response.get('Role').get('Arn')
+    return response.get('Role', {}).get('Arn', None)
 
 def _get_urlencode(policy):
     return json.dumps(policy)
 
-def _create_role(client, name, policy):
+def _create_role(name, policy):
     response = client.create_role(
         RoleName=name,
         AssumeRolePolicyDocument=_get_urlencode(policy)
     )
 
-    return response.get('Role', {}).get('Arn', '')
+    return response.get('Role', {}).get('Arn', None)

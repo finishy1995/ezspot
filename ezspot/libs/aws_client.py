@@ -1,6 +1,18 @@
 import boto3
 import botocore
+import logger
 from functools import partial
+
+class Resource:
+    clients = {}
+    destroy = []
+    
+    def destroy_back(self):
+        for index in xrange(len(self.destroy) - 1, -1, -1):
+            self.destroy[index][0](self.destroy[index][1])
+            
+        logger.info('All AWS resources which have been created in this project has been rollback.')
+resources = Resource()
 
 def client(args, service='ec2'):
     if args.aws_profile:
@@ -16,8 +28,38 @@ def client(args, service='ec2'):
             client = partial(client, args.aws_region)
         
     if args.aws_access_key_id and args.aws_secret_access_key:
-        return client(
+        resources.clients[service] = client(
             aws_access_key_id=args.aws_access_key_id,
             aws_secret_access_key=args.aws_secret_access_key)
     else:
-        return client()
+        resources.clients[service] =  client()
+
+def call(client, method, message=None, runback=None, **kwargs):
+    _debug_output(client, method, **kwargs)
+    func = getattr(resources.clients[client], method)
+    try:
+        response = func(**kwargs)
+    except Exception, args:
+        error_handler(str(args), "Failed to run client : {0}, method: {1}".format(client, method))
+    else:
+        if message:
+            logger.debug(message)
+            
+        if runback:
+            resources.destroy.append([runback, response])
+            
+        return response
+
+def error_handler(log_message, runtime_message):
+    logger.error(log_message)
+    resources.destroy_back()
+    raise RuntimeError(runtime_message)
+
+def _debug_output(client, method, **kwargs):
+    words = "Trying to run client: {0}, method: {1} .".format(client, method)
+    if len(kwargs) > 0:
+        words += " Args are as following: "
+    
+    logger.debug(words)
+    for key in kwargs:
+        logger.debug('    ' + key + ' = ' + str(kwargs[key]))
