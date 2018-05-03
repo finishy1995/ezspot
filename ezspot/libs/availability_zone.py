@@ -1,5 +1,16 @@
 #coding:utf-8
 
+def describe_availability_zones(client):
+    response = client.describe_availability_zones(
+    )
+    
+    az_arr = []
+    for az in response.get('AvailabilityZones', []):
+        az_arr.append(az.get('ZoneName'))
+    az_arr.sort()
+    
+    return az_arr
+
 class AvailabilityZone:
     def __init__(self, zone_name, price_history, client):
         self.zone_name = zone_name

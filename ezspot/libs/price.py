@@ -1,14 +1,23 @@
 import datetime
 import sys
 import boto3
-from availability_zone import AvailabilityZone
+from libs.availability_zone import AvailabilityZone
 
-def get_az_arr(config):
+def get_az(config):
+    az_arr = _get_az_arr(config)
+    az_all = []
+    for index in xrange(len(az_arr)):
+        az_all.append(az_arr[0])
+    
+    config.set_azs(az_all)
+    return az_arr[0].zone_name
+
+def _get_az_arr(config):
     zone_names = _get_zone_names(config.ec2Client)
     instance_type = config.wld_instance_type
     az_arr = []
     
-    for index in xrange(len(instance_type)):
+    for index in xrange(config.wld_fleet_number):
         azs = []
         for zone_name in zone_names:
             price_history = _get_price_history(config, zone_name, instance_type[index])
