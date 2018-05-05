@@ -1,6 +1,7 @@
 import os.path
 import six
 from config_loader import raw_config_parse
+from request import Request
 import libs.logger as logger
 from libs.iam_role import get_fleet_role
 from libs.ami import get_ami_id
@@ -9,8 +10,6 @@ from libs.aws_client import error_handler
 
 class Config:
     def __init__(self, args, flag=False):
-        build_client(args)
-        build_client(args, 'iam')
         self._config = self.default_config(args.wld_fleet_number)
         
         if args.lau_config_file_path:
@@ -31,13 +30,27 @@ class Config:
         
         self._config.update({k: v for k, v in six.iteritems(vars(args)) if v})
         
+        request = Request()
+        for key in self._config:
+            if hasattr(request, key):
+                setattr(request, key, self._config[key])
+        build_client(request)
+        build_client(request, 'iam')
+        
         fleet_number = self._config.get('wld_fleet_number', None)
         if fleet_number:
             self._config['wld_fleet_number'] = int(fleet_number)
+            
         capacity = self._config.get('wld_instance_capacity', None)
         if capacity:
             for index in xrange(len(capacity)):
                 capacity[index] = int(capacity[index])
+                
+        block_duration = self._config.get('wld_block_duration', None)
+        if block_duration:
+            for index in xrange(len(block_duration)):
+                block_duration[index] = int(block_duration[index]) * 60
+                
         logger.info('Config load successfully.')
         
         if flag:
@@ -76,6 +89,7 @@ class Config:
             'aws_profile'               : 'default',
             'prc_product_timerange'     : 168,
             'prc_product_description'   : 'Linux/UNIX (Amazon VPC)',
+            'wld_fleet_type'            : 'normal',
             'wld_fleet_number'          : number,
             'wld_instance_type'         : [],
             'wld_instance_capacity'     : [],
@@ -104,8 +118,14 @@ class Config:
                 self._config['wld_instance_subnet'].append('')
         
         self._config['wld_instance_subnet'][index] = subnet
+        
+    def get_arr_attr(self, attr, index):
+        value = self._config.get(attr, None)
+    
+        if value and len(value) > index:
+            return value[index]
+        else:
+            return None
 
     def __getattr__(self, key):
-        if not self._config.get(key):
-            return None
-        return self._config.get(key)
+        return self._config.get(key, None)

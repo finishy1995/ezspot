@@ -54,6 +54,14 @@ def error_handler(log_message, runtime_message):
     logger.error(log_message)
     resources.destroy_back()
     raise RuntimeError(runtime_message)
+    
+def get_waiter(client, waiter_type):
+    func = getattr(resources.clients[client], 'get_waiter')
+    
+    if func:
+        return func(waiter_type)
+    else:
+        error_handler('Can not wait for the client.', "Failed to create a wait client for {0}.".format(waiter_type))
 
 def _debug_output(client, method, **kwargs):
     words = "Trying to run client: {0}, method: {1} .".format(client, method)

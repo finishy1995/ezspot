@@ -4,15 +4,15 @@ import logger
 
 client = 'ec2'
 
-def create_eip(instances, tag):
+def create_eip(instances_ids, tag):
     elastic_ip_arr = []
     
-    for instance in instances:
+    for instance_id in instances_ids:
         response = _allocate_address()
         if response['PublicIp'] and response['AllocationId']:
             elastic_ip_arr.append(response['PublicIp'])
             _tag_address(response['AllocationId'], tag)
-            _associate_address(response['AllocationId'], instance['InstanceId'])
+            _associate_address(response['AllocationId'], instance_id)
         else:
             error_handler('Allocate public IP failed.', 'Failed to create EIP for spot instances.')
         
@@ -25,7 +25,7 @@ def delete_eip(tag):
     if eips != []:
         for eip in eips:
             _disassociate_address(eip.get('AssociationId', None))
-            _release_address(eip.get('AllocationId', None))
+            release_address(eip.get('AllocationId', None))
     else:
         error_handler('Describe public IP failed.', 'Failed to delete EIP from spot instances.')
 
@@ -119,7 +119,7 @@ def _disassociate_address(association_id):
     else:
         error_handler('Disassociate public IP failed.', 'Failed to delete EIP from spot instances.')
 
-def _release_address(allocation_id):
+def release_address(allocation_id):
     if allocation_id:
         call(
             client,

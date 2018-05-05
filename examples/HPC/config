@@ -7,3 +7,26 @@ wld_instance_capacity = [1,2]
 wld_fleet_tag = [master,worker]
 wld_instance_ami = [ami-02f5e160, ami-a1ccd8c3]
 wld_instance_key = [self-ZHY,self-ZHY]
+
+[emergency]
+aws_profile = bjs
+aws_region = cn-northwest-1
+wld_fleet_number = 2
+wld_fleet_type = persistent  
+wld_block_duration = [3,3]
+wld_instance_type = [r4.large,c4.large]
+wld_instance_capacity = [1,2]
+wld_fleet_tag = [master-emergency,worker-emergency]
+wld_instance_ami = [ami-02f5e160, ami-a1ccd8c3]
+wld_instance_key = [self-ZHY,self-ZHY]
+
+[ondemand]
+aws_profile = bjs
+aws_region = cn-northwest-1
+wld_fleet_number = 2
+wld_fleet_type = on-demand
+wld_instance_type = [r4.large,c4.large]
+wld_instance_capacity = [1,2]
+wld_fleet_tag = [master-ondemand,worker-ondemand]
+wld_instance_ami = [ami-02f5e160, ami-a1ccd8c3]
+wld_instance_key = [self-ZHY,self-ZHY]

@@ -1,2 +1,3 @@
 *.pyc
 /test/.pytest_cache/*
+/ezspot/test.*
