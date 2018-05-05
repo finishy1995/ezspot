@@ -25,7 +25,7 @@ def delete_eip(tag):
     if eips != []:
         for eip in eips:
             _disassociate_address(eip.get('AssociationId', None))
-            _release_address(eip.get('AllocationId', None))
+            release_address(eip.get('AllocationId', None))
     else:
         error_handler('Describe public IP failed.', 'Failed to delete EIP from spot instances.')
 
@@ -119,7 +119,7 @@ def _disassociate_address(association_id):
     else:
         error_handler('Disassociate public IP failed.', 'Failed to delete EIP from spot instances.')
 
-def _release_address(allocation_id):
+def release_address(allocation_id):
     if allocation_id:
         call(
             client,

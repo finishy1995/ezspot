@@ -1,8 +1,73 @@
 import logger
+import time
 from aws_client import call
 from aws_client import error_handler
+from aws_client import get_waiter
+from elastic_ip import create_eip
+from elastic_ip import delete_eip
 
 client = 'ec2'
+
+def start_on_demand_instances(config, index):
+    tag = config.get_arr_attr('wld_fleet_tag', index)
+    
+    instances_ids = _request(config, index)
+    logger.info('Request on-demand instances successfully. Instances IDs : ' + str(instances_ids))
+    time.sleep(5)
+    
+    instance_wait_until_running(instances_ids)
+    eip_arr = create_eip(instances_ids, tag)
+    
+    logger.info('On-demand instances ready.')
+    logger.info('Instances public IP: ' + str(eip_arr))
+    
+def cancel_on_demand_instances(config, index):
+    tag = config.get_arr_attr('wld_fleet_tag', index)
+    instances_ids = _get_instances_ids(tag)
+    logger.info('Get on-demand instance ids successfully. Instances IDs : ' + str(instances_ids))
+    status = terminate_instances(instances_ids)
+    
+    if status:
+        logger.info('Cancel on-demand instances successfully.')
+        delete_eip(tag)
+    else:
+        error_handler('Can not cancel on-demand instances requests.', 'Failed to cancel on-demand instances.')
+    
+    logger.info('On-demand instances all clear.')
+
+def _request(config, index):
+    kwargs = get_specification(config, index, request_type='on_demand')
+    kwargs['MaxCount'] = config.wld_instance_capacity[index]
+    kwargs['MinCount'] = config.wld_instance_capacity[index]
+    response = call(
+        client,
+        'run_instances',
+        'Run on-demand instances.',
+        _runback_on_demand_instances,
+        **kwargs
+    )
+    
+    return _get_instances_ids_from_response(response)
+        
+def _get_instances_ids_from_response(response):
+    instances = response.get('Instances', [])
+    if instances == []:
+        error_handler('Can not request on-demand instances.', 'Failed to request on-demand instances.')
+    else:
+        instances_ids = []
+        for instance in instances:
+            instance_id = instance.get('InstanceId', None)
+            if instance_id:
+                instances_ids.append(instance_id)
+            else:
+                error_handler('Can not get instance id from response.', 'Failed to request on-demand instances.')
+                
+        return instances_ids
+
+def _runback_on_demand_instances(response):
+    instances_ids = _get_instances_ids_from_response(response)
+    
+    terminate_instances(instances_ids)
 
 def get_specification(config, index, request_type='spot_fleet'):
     item = {}
@@ -23,6 +88,7 @@ def get_specification(config, index, request_type='spot_fleet'):
     if request_type == 'spot_fleet':
         item['WeightedCapacity'] = 1
         
+    if request_type == 'spot_fleet' or request_type == 'on_demand':
         value = config.get_arr_attr('wld_fleet_tag', index)
         if value:
             item['TagSpecifications'] = [ {
@@ -74,6 +140,10 @@ def create_tag(instances_ids, tag):
         )
     else:
         error_handler('Unsupported tag type : None.', 'Failed to create instances tag.')
+
+def instance_wait_until_running(instances_ids):
+    waiter = get_waiter(client, 'instance_running')
+    return waiter.wait(InstanceIds=instances_ids)
 
 def _insert_new_key(config, attr, index, item, key):
     value = config.get_arr_attr(attr, index)

@@ -3,7 +3,6 @@ import time
 import sys
 import logger
 from aws_client import call
-from libs.availability_zone import AvailabilityZone
 
 client = 'ec2'
 

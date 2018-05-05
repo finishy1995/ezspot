@@ -6,6 +6,7 @@ from aws_client import get_waiter
 from instance import get_specification
 from instance import terminate_instances
 from instance import create_tag
+from instance import instance_wait_until_running
 from elastic_ip import create_eip
 from elastic_ip import delete_eip
 
@@ -27,7 +28,7 @@ def start_persistent_instances(config, index):
     instances_ids = _describe_request(request_ids)
     
     create_tag(instances_ids, tag)
-    _wait_until_running(instances_ids)
+    instance_wait_until_running(instances_ids)
     eip_arr = create_eip(instances_ids, tag)
     
     logger.info('Spot instances ready.')
@@ -37,7 +38,7 @@ def cancel_persistent_instances(config, index):
     tag = config.get_arr_attr('wld_fleet_tag', index)
     request_ids = _describe_request_by_tag(tag)
     logger.info('Get spot instance request ids successfully. Request IDs : ' + str(request_ids))
-    status = _cancel_spot_request(request_ids, 'Can not cancel spot instance requests, please remember to delete it in your AWS console.')
+    status = cancel_spot_request(request_ids, 'Can not cancel spot instance requests, please remember to delete it in your AWS console.')
     
     if status:
         logger.info('Cancel spot instance requests successfully.')
@@ -80,9 +81,9 @@ def _runback_spot_request(response):
     error_message = 'Can not delete spot instances, please remember to delete it in your AWS console.'
     request_ids = _get_request_ids_from_response(response)
     
-    _cancel_spot_request(request_ids, error_message)
+    cancel_spot_request(request_ids, error_message)
 
-def _cancel_spot_request(request_ids, error_message):
+def cancel_spot_request(request_ids, error_message, wite_instances=True):
     response = call(
         client,
         'cancel_spot_instance_requests',
@@ -94,21 +95,18 @@ def _cancel_spot_request(request_ids, error_message):
     if response.get('CancelledSpotInstanceRequests', []) == []:
         logger.error(error_message)
         flag = False
-        
-    instances_ids = _describe_request(request_ids)
-    status = terminate_instances(instances_ids)
-    if flag and not status:
-        flag = status
+    
+    if wite_instances:
+        instances_ids = _describe_request(request_ids)
+        status = terminate_instances(instances_ids)
+        if flag and not status:
+            flag = status
         
     return flag
 
 def _wait_until_completed(request_ids):
     waiter = get_waiter(client, 'spot_instance_request_fulfilled')
     return waiter.wait(SpotInstanceRequestIds=request_ids)
-    
-def _wait_until_running(instances_ids):
-    waiter = get_waiter(client, 'instance_running')
-    return waiter.wait(InstanceIds=instances_ids)
 
 def _describe_request(request_ids):
     response = call(

@@ -30,7 +30,7 @@ def cancel_fleet(config, index):
     
     if request_id:
         logger.info('Get fleet request id successfully. Request ID : ' + request_id)
-        response = _cancel_fleet_request(request_id)
+        response = cancel_fleet_request(request_id)
         
         if response.get('UnsuccessfulFleetRequests', []) == []:
             logger.info('Cancel fleet request successfully.')
@@ -38,7 +38,7 @@ def cancel_fleet(config, index):
         else:
             error_handler('Cancel fleet request failed, please check your config.', 'Get the following response: ' + str(response.get('UnsuccessfulFleetRequests', [])))
     else:
-        error_handler('Cancel fleet request failed, please check your config.', 'Failed to get fleet request id.')
+        logger.error('Cancel fleet request failed, please check your config.')
         
     logger.info('Spot fleet cancelled.')
 
@@ -57,7 +57,7 @@ def fleet_status(config, index):
         
         return fleet_price
     else:
-        error_handler('Get fleet status failed, please check your config.', 'Failed to get fleet request id.')
+        logger.error('Get fleet status failed, please check your config.')
 
 def _request(config, index):
     specification_arr = []
@@ -85,7 +85,7 @@ def _runback_fleet_request(response):
     if not request_id:
         logger.error(error_message)
     else:
-        response = _cancel_fleet_request(request_id)
+        response = cancel_fleet_request(request_id)
         if response.get('UnsuccessfulFleetRequests', []) != []:
             logger.error(error_message)
 
@@ -153,7 +153,7 @@ def _get_fleet_request_id(config, index):
     
     return None
     
-def _cancel_fleet_request(request_id):
+def cancel_fleet_request(request_id):
     return call(
         client,
         'cancel_spot_fleet_requests',
