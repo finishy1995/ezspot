@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 
 logger = logging.getLogger(__name__)
 logger.setLevel(level = logging.DEBUG)
@@ -25,7 +26,10 @@ console_handler.setFormatter(formatter_info)
 
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
-logger.debug('')
+
+file = open(file_path, 'a')
+file.write("\n[{0}]\n".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+file.close()
 
 def setLevel(level):
     if level == 'DEBUG':

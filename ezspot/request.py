@@ -1,5 +1,10 @@
 import libs.logger as logger
 
+class Default_Request:
+    lau_config_file_path    = None
+    lau_config_file         = None
+default_request = Default_Request()
+
 class Request:
     # EZSpot Config
     lau_config_file_path    = None
@@ -12,6 +17,8 @@ class Request:
     aws_secret_access_key   = None
     
     # Workload config
+    wld_fleet_type          = None
+    wld_block_duration      = None
     wld_fleet_number        = None
     wld_instance_type       = None
     wld_instance_azs        = None
@@ -28,7 +35,7 @@ class Request:
     prc_product_description = None
     prc_product_timerange   = None
     
-    def __init__(self, args):
+    def __init__(self, args=default_request):
         for key,value in vars(args).items():
             if hasattr(self, key):
                 setattr(self, key, value)
