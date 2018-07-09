@@ -1,0 +1,33 @@
+body {
+  background: #f0f2f5;
+}
+
+a:link, a:visited {
+  text-decoration:none;
+}
+
+.app-header {
+  position: fixed;
+  width: 100%;
+  z-index: 1;
+  font-size: 18px;
+  background-color: #343a40;
+}
+
+.app-content {
+  width: 90%;
+  margin: 0 auto;
+  padding-top: 104px;
+  padding-bottom: 40px;
+}
+
+.app-footer {
+  border-top: 1px solid #CCC;
+  width: 90%;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.app-block {
+  margin-top: 40px;
+}

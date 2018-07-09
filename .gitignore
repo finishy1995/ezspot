@@ -1,3 +1,9 @@
 *.pyc
-/test/.pytest_cache/*
-/ezspot/test.*
+
+/source/web_app/build
+/source/web_app/node_modules
+/source/web_app/npm-debug.log*
+/source/web_app/yarn-debug.log*
+/source/web_app/yarn-error.log*
+/source/web_app/yarn.lock
+/source/web_app/public/assets
