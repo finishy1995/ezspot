@@ -18,7 +18,13 @@ class Settings extends Component {
       });
       
     Auth.currentSession().then(session => {
-      API.get('APIGateway', '/account?accessT=' + encodeURI(session.accessToken.jwtToken)).then(response => {
+      // API.get('APIGateway', '/account?accessT=' + encodeURI(session.accessToken.jwtToken)).then(response => {
+      //   console.log(response);
+      // }).catch(error => {
+      //   console.log(error);
+      // });
+      
+      API.post('APIGateway', '/account').then(response => {
         console.log(response);
       }).catch(error => {
         console.log(error);

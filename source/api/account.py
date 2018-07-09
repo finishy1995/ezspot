@@ -1,25 +1,26 @@
 from lib.dynamodb import list_items, create_items, delete_item
 
-def account_handler(event, context):
-    if 'user' in event and event['user'] != '':
-        raise Exception('Invalid event!')
-    
-    if event['Records'][0]['eventSource'] == 'account:list':
-        return _list(event['Records'][0])
-    if event['Records'][0]['eventSource'] == 'account:create':
-        return _create(event['Records'][0])
-    if event['Records'][0]['eventSource'] == 'account:update':
-        return _update(event['Records'][0])
-    if event['Records'][0]['eventSource'] == 'account:delete':
-        return _delete(event['Records'][0])
+def account_handler(event):
+    if event['eventSource'] == 'account':
+        if event['eventMethod'] == 'GET':
+            return _list(event)
+    # if event['eventSource'] == 'account:POST':
+    #     return _create(event['Records'][0])
+    # if event['eventSource'] == 'account:PUT':
+    #     return _update(event['Records'][0])
+    # if event['eventSource'] == 'account:DELETE':
+    #     return _delete(event['Records'][0])
 
-    raise Exception('Unsupported event type!')
+    return { 'body': 'Unsupported event.' }
         
 def _list(event):
-    return list_items(
+    response = list_items(
         table='Account',
-        filters=[_item(event, 'user_name')]
+        filters=[_item(event, 'username')],
+        attributes='account_id, username, account_name, ak, account_type, account_timestamp'
     )
+    
+    return { 'status': True, 'body': response }
     
 def _create(event):
     data = []
@@ -60,13 +61,10 @@ def _item(event, name, index=0):
         'type': 'S',
     }
     
-    if name == 'old_account_name':
-        item['key'] = 'account_name'
-    
-    if name == 'user_name':
-        item['value'] = event['user']
-    else:
-        item['value'] = event['accounts'][index][name]
+    if name == 'username':
+        item['value'] = event['username']
+    # else:
+    #     item['value'] = event['accounts'][index][name]
         
     if name == 'timestamp':
         item['type'] = 'N'

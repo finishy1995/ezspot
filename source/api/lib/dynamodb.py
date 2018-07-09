@@ -3,7 +3,7 @@ import boto3
 TableMap = {
     'Account': 'EZSpot-Account'
 }
-client = boto3.client('dynamodb', region_name='ap-northeast-1')
+client = boto3.client('dynamodb')
 
 def list_items(**kwargs):
     '''
@@ -12,7 +12,7 @@ def list_items(**kwargs):
     Args:
         limit: A number how many items you want to return. Default 100.
         table: Required. A string which table you want to list
-        attributes: An array which attributes you want to get in response(Will get all attributes if not set)
+        attributes: An string which attributes you want to get in response(Will get all attributes if not set, ',' to split.)
         filters: A list describe how to filter the result.
     '''
     
