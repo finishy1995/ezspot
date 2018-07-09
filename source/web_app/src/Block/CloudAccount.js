@@ -40,14 +40,14 @@ class CloudAccount extends Component {
         key: '0',
         name: 'test',
         type: 'AWS China',
-        ak: 'AKIAJQUBSSQFH55VOOAA',
+        ak: 'AKIAJQAAAAAFH55VOOAA',
         sk: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
       },
       {
         key: '1',
         name: 'test2',
         type: 'AWS China',
-        ak: 'AKIAJQUBSSQFH55VOOAB',
+        ak: 'AKIAJQAAAAAFH55VOOAB',
         sk: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
       }
     ]
