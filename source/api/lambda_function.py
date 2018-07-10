@@ -3,6 +3,7 @@ from lib.event import generate_event
 import json
 
 def lambda_handler(event, context):
+    print(event)
     event = generate_event(event)
     
     if not 'eventSource' in event or not 'username' in event:

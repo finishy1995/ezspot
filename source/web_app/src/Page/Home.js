@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { withAuthenticator } from 'aws-amplify-react';
 
 class Home extends Component {
   render() {
@@ -9,4 +8,4 @@ class Home extends Component {
   }
 }
 
-export default withAuthenticator(Home);
+export default Home;

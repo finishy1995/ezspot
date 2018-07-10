@@ -94,8 +94,10 @@ class EditableTable extends Component {
   }
 
   create = () => {
-    this.setState({ editingKey: this.props.data.length });
-    this.props.create();
+    if (!this.props.loading) {
+      this.setState({ editingKey: 'tmp:'+this.props.data.length });
+      this.props.create();
+    }
   }
 
   cancel = (key) => {
@@ -187,6 +189,8 @@ class EditableTable extends Component {
           dataSource={this.props.data}
           columns={this.columns}
           rowClassName="editable-row"
+          loading={this.props.loading}
+          pagination={{ pageSize: 10 }}
         />
       </div>
     );

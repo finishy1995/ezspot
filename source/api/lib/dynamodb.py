@@ -61,6 +61,23 @@ def delete_item(**kwargs):
     else:
         raise Exception('Can not delete it!')
 
+def update_item(**kwargs):
+    update_expression = 'SET '
+    expression_attribute_values = {}
+    for item in kwargs['updates']:
+        update_expression += item['key'] + ' = :' + item['key'] + ', '
+        expression_attribute_values[':'+item['key']] = _convert_dynamodb_format(item)
+    update_expression = update_expression[:-2]
+    
+    request = {
+        'TableName': TableMap[kwargs['table']],
+        'Key': _convert_dynamodb_format_to_array(kwargs['key']),
+        'UpdateExpression': update_expression,
+        'ExpressionAttributeValues': expression_attribute_values
+    }
+    
+    return client.update_item(**request).get('Attributes', None)
+
 def _convert_dynamodb_format_to_array(array):
     response = {}
     for item in array:

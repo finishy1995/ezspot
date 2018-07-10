@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "antd": "^3.6.5",
-    "aws-amplify": "0.3.2",
+    "aws-amplify": "0.4.7",
     "aws-amplify-react": "0.1.41",
     "react": "16.4.0",
     "react-dom": "16.4.0",

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { withAuthenticator } from 'aws-amplify-react';
-import { Auth, API } from 'aws-amplify';
+import { Auth } from 'aws-amplify';
 import { Button } from 'antd';
 import CloudAccount from '../Block/CloudAccount';
 
@@ -9,27 +8,14 @@ class Settings extends Component {
     username: ''
   }
   
-  componentWillMount = () => {
+  constructor(props) {
+    super(props);
     var caller = this;
     
     Auth.currentAuthenticatedUser()
       .then(user => {
         caller.setState({ username: user.username });
       });
-      
-    Auth.currentSession().then(session => {
-      // API.get('APIGateway', '/account?accessT=' + encodeURI(session.accessToken.jwtToken)).then(response => {
-      //   console.log(response);
-      // }).catch(error => {
-      //   console.log(error);
-      // });
-      
-      API.post('APIGateway', '/account').then(response => {
-        console.log(response);
-      }).catch(error => {
-        console.log(error);
-      });
-    });
   }
   
   signOut = () => {
@@ -51,4 +37,4 @@ class Settings extends Component {
   }
 }
 
-export default withAuthenticator(Settings);
+export default Settings;

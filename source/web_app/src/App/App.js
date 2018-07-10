@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 // eslint-disable-next-line
 import Amplify, { Auth, API } from 'aws-amplify';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { withAuthenticator } from 'aws-amplify-react';
 import { Row, Col, Layout } from 'antd';
 import './App.css';
 import Home from '../Page/Home';
@@ -67,4 +68,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withAuthenticator(App);
